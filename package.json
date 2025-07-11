@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:ui": "playwright test --ui",
-    "test:debug": "playwright test --debug",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -20,7 +16,6 @@
     "@eslint/js": "^9.29.0",
     "@playwright/test": "^1.53.1",
     "@types/node": "^24.0.4",
-    "@wordpress/e2e-test-utils-playwright": "^1.26.0",
     "dotenv": "^16.5.0",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",

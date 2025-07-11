@@ -1,5 +1,4 @@
 import { defineConfig, devices } from "@playwright/test";
-import type { Config } from "@wordpress/e2e-test-utils-playwright";
 
 /**
  * Read environment variables from file.
@@ -30,7 +29,7 @@ const getScreenshotMode = (): "off" | "on" | "only-on-failure" => {
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig<Config>({
+export default defineConfig({
   testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -57,34 +56,18 @@ export default defineConfig<Config>({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: "setup",
-      testMatch: /auth\.setup\.ts/,
-    },
-    {
       name: "chromium",
-      use: {
-        ...devices["Desktop Chrome"],
-        storageState: "tests/.auth/user.json",
-      },
-      dependencies: ["setup"],
+      use: { ...devices["Desktop Chrome"] },
     },
 
     {
       name: "firefox",
-      use: {
-        ...devices["Desktop Firefox"],
-        storageState: "tests/.auth/user.json",
-      },
-      dependencies: ["setup"],
+      use: { ...devices["Desktop Firefox"] },
     },
 
     {
       name: "webkit",
-      use: {
-        ...devices["Desktop Safari"],
-        storageState: "tests/.auth/user.json",
-      },
-      dependencies: ["setup"],
+      use: { ...devices["Desktop Safari"] },
     },
 
     /* Test against mobile viewports. */
