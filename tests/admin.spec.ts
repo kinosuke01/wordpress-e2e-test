@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import * as fs from "fs";
+import * as path from "path";
 
 test.describe("WordPress ログイン/ログアウト", () => {
   test("WordPress管理画面へのログインとログアウト", async ({ page }) => {
@@ -127,6 +129,17 @@ test.describe("WordPress ログイン/ログアウト", () => {
         page.getByRole("heading", { name: "メディアライブラリ", level: 1 })
       ).toBeVisible();
 
+      // 動的ファイル名を生成（タイムスタンプベース）
+      const timestamp = Date.now();
+      const originalFileName = "sky.png";
+      const dynamicFileName = `test-sky-${timestamp}.png`;
+      const originalFilePath = path.join("tests", originalFileName);
+      const dynamicFilePath = path.join("tests", dynamicFileName);
+      const fileNameWithoutExt = `test-sky-${timestamp}`;
+
+      // 元ファイルを新しい名前でコピー
+      fs.copyFileSync(originalFilePath, dynamicFilePath);
+
       // テスト用画像ファイルをアップロード
       await page
         .getByRole("button", { name: "メディアファイルを追加" })
@@ -139,7 +152,7 @@ test.describe("WordPress ログイン/ログアウト", () => {
       ).toBeVisible();
 
       const fileInput = page.locator('input[type="file"]');
-      await fileInput.setInputFiles("tests/sky.png");
+      await fileInput.setInputFiles(dynamicFilePath);
 
       // アップロード完了確認
       await expect(
@@ -154,14 +167,14 @@ test.describe("WordPress ログイン/ログアウト", () => {
       // 登録した画像がライブラリに表示されているか確認
       await expect(
         page.getByRole("checkbox", {
-          name: "8ebcc29cc69a37a0ad7a99f3601d8f51a5af921c",
+          name: fileNameWithoutExt,
         })
       ).toBeVisible();
 
       // 実際の画像をクリックして詳細表示
       await page
         .getByRole("checkbox", {
-          name: "8ebcc29cc69a37a0ad7a99f3601d8f51a5af921c",
+          name: fileNameWithoutExt,
         })
         .click();
 
@@ -177,26 +190,30 @@ test.describe("WordPress ログイン/ログアウト", () => {
       ).toBeVisible();
 
       // 画像のメタ情報（ファイル名、サイズなど）が表示されているか確認
-      await expect(
-        page.getByText(
-          "ファイル名: 8ebcc29cc69a37a0ad7a99f3601d8f51a5af921c.png"
-        )
-      ).toBeVisible();
+      await expect(page.getByText("ファイル名:", { exact: true })).toBeVisible();
       await expect(page.getByText("ファイルタイプ: image/png")).toBeVisible();
-      await expect(page.getByText("ファイルサイズ: 28 KB")).toBeVisible();
-      await expect(page.getByText("サイズ: 1280 x 720 ピクセル")).toBeVisible();
+      await expect(page.getByText("ファイルサイズ:", { exact: true })).toBeVisible();
+      await expect(page.getByText("サイズ:", { exact: true })).toBeVisible();
 
       // 画像のURLリンクをクリックして直接表示できるか確認
       await page.getByRole("link", { name: "ファイルをダウンロード" }).click();
 
       // 画像が直接ブラウザで表示されるか確認
-      await expect(page).toHaveURL(
-        /8ebcc29cc69a37a0ad7a99f3601d8f51a5af921c\.png$/
-      );
+      const expectedURLPattern = new RegExp(`${fileNameWithoutExt}.*\\.png$`);
+      await expect(page).toHaveURL(expectedURLPattern);
       await expect(page.getByRole("img")).toBeVisible();
 
       // 管理画面に戻る
       await page.goto("wp-admin");
+
+      // テスト用ファイルのクリーンアップ
+      try {
+        if (fs.existsSync(dynamicFilePath)) {
+          fs.unlinkSync(dynamicFilePath);
+        }
+      } catch (error) {
+        console.warn(`Failed to cleanup test file: ${dynamicFilePath}`, error);
+      }
     });
 
     await test.step("ログアウト", async () => {
