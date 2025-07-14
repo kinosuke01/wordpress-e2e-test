@@ -190,9 +190,13 @@ test.describe("WordPress ログイン/ログアウト", () => {
       ).toBeVisible();
 
       // 画像のメタ情報（ファイル名、サイズなど）が表示されているか確認
-      await expect(page.getByText("ファイル名:", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText("ファイル名:", { exact: true })
+      ).toBeVisible();
       await expect(page.getByText("ファイルタイプ: image/png")).toBeVisible();
-      await expect(page.getByText("ファイルサイズ:", { exact: true })).toBeVisible();
+      await expect(
+        page.getByText("ファイルサイズ:", { exact: true })
+      ).toBeVisible();
       await expect(page.getByText("サイズ:", { exact: true })).toBeVisible();
 
       // 画像のURLリンクをクリックして直接表示できるか確認
